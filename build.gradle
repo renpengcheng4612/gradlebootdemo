@@ -1,0 +1,84 @@
+
+buildscript {
+    ext{
+        springBootVersion ="2.5.5"
+    }
+    repositories{
+        mavenCentral()
+/*        maven {
+            url 'https://repo.ark.tools.huawei.com/artifactory/maven-pubilc/'
+        }*/
+        maven {
+            url 'https://maven.aliyun.com/repository/central'
+        }
+    }
+
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+    }
+
+}
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'org.springframework.boot'
+
+    group 'cn.chinaClear'
+    version '1.0-SNAPSHOT'
+
+    repositories {
+        mavenCentral()
+        /*maven {
+            url 'https://repo.ark.tools.huawei.com/artifactory/maven-pubilc/'
+        }*/
+        maven{
+            url'https://developer.huawei.com/repo/'
+        }
+        maven {
+            url 'https://maven.aliyun.com/repository/central'
+        }
+    }
+
+    dependencies {
+        testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+        testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+        // 引入SpringBoot 相关的配置
+        implementation "org.springframework.boot:spring-boot-starter:2.5.5"
+        implementation "org.springframework.boot:spring-boot-starter-web:2.5.5"
+        implementation "org.springframework.boot:spring-boot-starter-test:2.5.5"
+
+
+
+        testImplementation  'junit:junit:4.13.2'
+
+
+        // 测试相关的依赖
+
+
+
+      // implementation 'org.springframework.boot.spring-boot-starter-validation:2.5.5'
+      // implementation 'org.projectlombok:lombok:1.8.10'
+
+
+
+        // implementation 'org.springframework:spring:5.3.8'
+        // implementation "org.springframework.boot:spring-date-redis:2.3.2.RELEASE"
+        // implementation "org.springframework.boot:spring-boot-starter-ldap:2.3.2.RELEASE"
+        // implementation "org.springframework.boot:spring-boot-starter-jdbc:2.3.2"
+    }
+
+
+    configurations.all {
+        resolutionStrategy {
+            force 'org.springframework:spring:5.3.8'
+            //  force 'com.github.bumptech.glide:compiler:4.2.0'
+        }
+    }
+
+    test {
+        useJUnitPlatform()
+    }
+
+}
+
+

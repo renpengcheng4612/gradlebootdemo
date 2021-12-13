@@ -1,0 +1,235 @@
+
+<font color=#999AAA > 原文地址：https://docs.openshift.com/container-platform/4.9/openshift_images/managing_images/tagging-images.html
+
+</font>
+
+@[TOC](Open Shift 镜像流相关---ImageStream tag)
+
+
+<hr style=" border:solid; width:100px; height:1px;" color=#000000 size=1">
+
+# Tagging images
+
+<font color=#999AAA >Image tags                     镜像标签
+Image tag conventions                                   镜像标签惯例
+Adding tags to image streams                        给镜像流打标签
+Removing tags from image streams              从镜像流移除标签
+Referencing images in imagestreams            通过镜像流引用镜像</font>
+
+<hr style=" border:solid; width:100px; height:1px;" color=#000000 size=1">
+
+<font color=#999AAA >提示：以下是本篇文章正文内容
+
+# 一、Image tags  镜像标签：
+
+
+<font color=#99999>
+  An image tag is a label applied to a container image in a repository that distinguishes a specific image from other images in an image stream. Typically, the tag represents a version number of some sort. For example, here :v3.11.59-2 is the tag:
+
+  ````
+    registry.access.redhat.com/openshift3/jenkins-2-rhel7:v3.11.59-2
+  ````
+
+   镜像标签是应用于在存储库中容器镜像的一个标识，用于在镜像流中区别于其他镜像，通常，标签标识为某种版本号，比如：v3.11.59-2  是一个标签。
+
+   <font color=#99999>
+   You can add additional tags to an image. For example, an image might be assigned the tags :v3.11.59-2 and :latest.
+
+   你可以向图像中增加额外标记，例如，一个镜像可以被 :v3.11.59-2 and :latest 所标记。
+       <font color=#99999>
+    OpenShift Container Platform provides the oc tag command, which is similar to the docker tag command, but operates on image streams instead of directly on images.
+
+OpenShift容器平台提供了oc标签命令，它类似于docker标签命令，但在镜像流上操作，而不是直接在镜像上操作。
+
+
+
+
+# 二、Image tags conventions 镜像标签惯例
+   <font color=#99999>
+ images evolve over time and their tags reflect this. Generally, an image tag always points to the latest image built.
+   If there is too much information embedded in a tag name, like v2.0.1-may-2019, the tag points to just one revision of an image and is never updated. Using default image pruning options, such an image is never removed. In very large clusters, the schema of creating new tags for every revised image could eventually fill up the etcd datastore with excess tag metadata for images that are long outdated.
+
+镜像会随着时间的推移而发生变化，一个镜像标记总是指向最新的镜像。
+如果在一个标签中嵌入了太多信息，比如 v2.0.1-may-2019 ，这个标签只是指向了一个镜像的修订版，并且永远不会更新，使用默认的镜像修剪选项，这样的镜像永远不会删除，在相当大的集群中，为每个更新的镜像创建新标记，最终可能会因为长期过时的镜像及多余标记元数据填满etcd数据存储。
+
+   <font color=#99999>
+   If the tag is named v2.0, image revisions are more likely. This results in longer tag history and, therefore, the image pruner is more likely to remove old and unused images.
+
+   如果 tag 被标记为 v2.0 ,  则更有可能进行镜像更新，这将导致更长的标记使用历史，图像剪枝器更有可能删除旧的和没有用的镜像。
+
+ <font color=#99999>
+    Although tag naming convention is up to you, here are a few examples in the format
+
+
+```
+     <image_name>:<image_tag>:
+ ```
+
+ <font color=#999AAA >
+尽管标签的命名方式取决于你，这里还是有一些例子：
+
+```
+     <image_name>:<image_tag>:
+ ```
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/f6cc6c3286534eb0ad96b7aa331654f0.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA54Sx5a6j,size_20,color_FFFFFF,t_70,g_se,x_16) <font color=#99999>
+  If you require dates in tag names, periodically inspect old and unsupported images and istags and remove them. Otherwise, you can experience increasing resource usage caused by retaining old images.
+
+ 如果您需要在标签名称中包含日期，请定期检查旧的和不支持的镜像和标签并删除它们。否则，您可能会因为保留旧镜像而增加资源使用。
+
+# 三、Adding tags to image streams  给镜像流添加标签：
+  <font color=#99999>
+ An image stream in OpenShift Container Platform comprises zero or more container images identified by tags.
+There are different types of tags available. The default behavior uses a permanent tag, which points to a specific image in time. If the permanent tag is in use and the source changes, the tag does not change for the destination.
+A tracking tag means the destination tag’s metadata is updated during the import of the source tag.
+
+ OpenShift容器平台中的镜像流包含0个或多个由标签标识的容器镜像.
+有不同类型的标签可用。默认行为使用永久标记，它在时间上指向特定的镜像。如果使用了永久标记，并且源更改了，则目标的标记不会更改。
+跟踪标记意味着在导入源标记期间更新目标标记的元数据。
+
+ <font color=#9878>
+Procedure：
+<font color=#99999>
+You can add tags to an image stream using the oc tag command:
+<font color=#999AAA >
+
+你可以通过 oc  tag 命令给一个镜像流增加标签：
+
+```
+$ oc tag  <source>   <destination>
+```
+
+  <font color=#99999>
+For example, to configure the ruby image stream static-2.0 tag to always refer to the current image for the ruby image stream 2.0 tag:
+<font color=#999AAA >
+
+例如，给 ruby  镜像流 配置标签 static-2.0 始终指向 2.0 标签
+
+```
+$ oc tag   ruby:2.0   ruby:static-2.0
+```
+
+
+
+   <font color=#99999>
+This creates a new image stream tag named static-2.0 in the ruby image stream. The new tag directly references the image id that the ruby:2.0 image stream tag pointed to at the time oc tag was run, and the image it points to never changes.
+
+
+这将在ruby镜像流中创建一个名为static-2.0的新镜像流标记。新的标记直接引用在oc标记运行时ruby:2.0镜像流标记所指向的镜像id，并且它所指向的镜像永远不会改变。
+
+  <font color=#99999>
+To ensure the destination tag is updated when the source tag changes, use the --alias=true flag:
+
+为了确保当源标记改变时目标标记被更新，使用 --alias=true标记:
+
+```
+ $ oc  tag --alias=true  <source> <destination>
+ ```
+
+Note:
+       <font color=#99999>
+Use a tracking tag for creating permanent aliases, for example, latest or stable. The tag only works correctly within a single image stream. Trying to create a cross-image stream alias produces an error.
+
+使用跟踪标签创建永久别名，例如，latest或stable。标签只能在单个镜像流中正确工作。试图创建跨镜像流别名会产生错误。
+        <font color=#99999>
+You can also add the --scheduled=true flag to have the destination tag be refreshed, or re-imported, periodically. The period is configured globally at the system level.
+
+ 还可以添加  --scheduled=true 标志以定期刷新或重新导入目标标记。周期在系统级全局配置。
+        <font color=#99999>
+    The --reference flag creates an image stream tag that is not imported.   The tag points to the source location, permanently.
+
+--reference 标记创建一个未导入的镜像流标记。标记永久指向源位置。
+
+   <font color=#99999>
+  If you want to instruct OpenShift Container Platform to always fetch the tagged image from the integrated registry, use    --reference-policy=local.  The registry uses the pull-through feature to serve the image to the client. By default, the image blobs are mirrored locally by the registry. As a result, they can be pulled more quickly the next time they are needed. The flag also allows for pulling from insecure registries without a need to supply --insecure-registry to the container runtime as long as the image stream has an insecure annotation or the tag has an insecure import policy.
+
+
+如果你想指示OpenShift容器平台总是从集成的注册表中获取标记的镜像，使用--reference-policy=local。注册中心使用拉入特性向客户端提供镜像。默认情况下，镜像对象注册在本地。因此，在下次需要它们时，它们可以更快地被拉出。只要镜像流有不安全的注释或标记有不安全的导入策略，该标志还允许从不安全注册中心提取而不需要提供   --insecure-registry到容器运行时。
+
+# 四、Removing tags from image streams  从镜像流移除标签
+   <font color=#99999>
+  You can remove tags from an image stream.
+
+  你可以从一个镜像流移除标记：
+
+<font color=#9878>
+Procedure：
+
+<font color=#99999>
+To remove a tag completely from an image stream run:
+
+ 从一个镜像流中完全删除一个 标志通过以下命令：
+  ```
+     $ oc delete  istag/ruby:latest
+     or:
+     $ oc tag   -druby:latest
+```
+# 五、 Referencing images in imagestreams   通过镜像流引用镜像
+   <font color=#99999>
+  You can use tags to reference images in image streams using the following reference types.
+
+   你可以通过以下类型在镜像流中指定镜像：
+
+   <font color=#99999>
+ When viewing example image stream definitions you may notice they contain definitions of ImageStreamTag and references to DockerImage, but nothing related to ImageStreamImage.
+
+当查看示例图像流定义时，你可能会注意到它们包含了ImageStreamTag的定义和对DockerImage的引用，但没有与ImageStreamImage相关的内容。
+   <font color=#99999>
+    This is because the ImageStreamImage objects are automatically created in OpenShift Container Platform when you import or tag an image into the image stream. You should never have to explicitly define an ImageStreamImage object in any image stream definition that you use to create image streams.
+
+这是因为当你将图像导入或标记到图像流中时，ImageStreamImage对象会在OpenShift容器平台中自动创建。在创建图像流的任何图像流定义中，都不应该明确定义ImageStreamImage对象。
+
+
+<font color=#9878>
+Procedure：
+
+   <font color=#99999>
+ To reference an image for a given image stream and tag, use ImageStreamTag:
+
+
+要引用给定镜像和标签的镜像流，使用ImageStreamTag:
+
+```
+  <image_stream_name>:<tag>
+```
+
+  <font color=#99999>
+To reference an image for a given image stream and image sha ID, use ImageStreamImage:
+
+ 要引用给定镜像和镜像Id的镜像流，使用 ImageStreamImage:
+
+  ```
+  <image_stream_name>@ <id>
+```
+
+   <font color=#99999>
+ The <id> is an immutable identifier for a specific image, also called a digest.
+
+
+ id 是特定镜像的不可变标识符，也称为摘要。
+
+   <font color=#99999>
+ To reference or retrieve an image for a given external registry, use DockerImage:
+
+
+  要引用或检索给定外部注册表的镜像，使用DockerImage:
+
+````
+  openshift/ruby-20-centos7:2.0
+ ````
+
+   <font color=#99999>
+  Note： When no tag is specified, it is assumed the latest tag is used.
+
+  Note ：如果没有指定标记，则假定使用的是最新标记。
+
+   <font color=#99999>
+You can also reference a third-party registry: registry.redhat.io/rhel7:latest Or an image with a digest:
+
+  你还可以引用第三方注册表, 或者通过摘要：
+ ````
+centos/ruby-22-centos7@sha256:3a335d7d8a452970c5b4054ad7118ff134b3a6b50a2bb6d0c07c746e8986b28e
+````
+
+
+
